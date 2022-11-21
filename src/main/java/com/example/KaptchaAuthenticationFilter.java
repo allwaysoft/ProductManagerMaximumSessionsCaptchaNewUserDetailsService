@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import com.google.code.kaptcha.Constants;
+import javax.servlet.http.HttpSession;
 
 public class KaptchaAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
@@ -39,6 +40,11 @@ public class KaptchaAuthenticationFilter extends AbstractAuthenticationProcessin
         if ("POST".equalsIgnoreCase(req.getMethod()) && servletPath.equals(req.getServletPath())) {
             String expect = (String) req.getSession().getAttribute(Constants.KAPTCHA_SESSION_KEY);
             if (expect != null && !expect.equalsIgnoreCase(req.getParameter("kaptcha"))) {
+                HttpSession session = req.getSession(false);
+                if (session != null) {
+                    session.invalidate();
+                }
+
                 unsuccessfulAuthentication(req, res, new InsufficientAuthenticationException("Incorrect captcha code."));
                 return;
             }
